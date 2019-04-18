@@ -1,0 +1,306 @@
+<!DOCTYPE html private "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>${title}</title>
+<style type="text/css">
+body {
+	font: normal 68% verdana, arial, helvetica;
+	color: #000000;
+}
+
+table tr td, table tr th {
+	font-size: 68%;
+}
+
+table.details tr th {
+	color: #ffffff;
+	font-weight: bold;
+	text-align: center;
+	background: #2674a6;
+	white-space: nowrap;
+}
+
+table.details tr td {
+	background: #eeeee0;
+	white-space: nowrap;
+}
+
+h1 {
+	margin: 0px 0px 5px;
+	font: 165% verdana, arial, helvetica
+}
+
+h2 {
+	margin-top: 1em;
+	margin-bottom: 0.5em;
+	font: bold 125% verdana, arial, helvetica
+}
+
+h3 {
+	margin-bottom: 0.5em;
+	font: bold 115% verdana, arial, helvetica
+}
+
+.Failure {
+	font-weight: bold;
+	color: red;
+}
+
+img {
+	border-width: 0px;
+}
+
+#div_left {
+	float: left;
+	width: 15%;
+	height: 100%;
+}
+
+#div_center {
+	float: left;
+	width: 2%;
+	height: 100%;
+}
+
+#div_right {
+	float: left;
+	width: 83%;
+	height: 100%;
+}
+
+#suites {
+	line-height: 1.7em;
+	border-spacing: 0.1em;
+	width: 100%;
+}
+
+.suite {
+	background-color: #999999;
+	font-weight: bold;
+}
+
+.header {
+	font-size: 1.0em;
+	font-weight: bold;
+	text-align: left;
+}
+
+.header.suite {
+	cursor: pointer;
+	clear: right;
+	height: 1.214em;
+	margin-top: 1px;
+}
+
+.toggle {
+	font-family: monospace;
+	font-weight: bold;
+	padding-left: 2px;
+	padding-right: 5px;
+	color: #777777;
+}
+
+.test {
+	background-color: #eeeeee;
+	padding-left: 2em;
+}
+
+.successIndicator {
+	float: right;
+	font-family: monospace;
+	font-weight: bold;
+	padding-right: 2px;
+	color: #44aa44;
+}
+
+.skipIndicator {
+	float: right;
+	font-family: monospace;
+	font-weight: bold;
+	padding-right: 2px;
+	color: #ffaa00;
+}
+
+.failureIndicator {
+	float: right;
+	font-family: monospace;
+	font-weight: bold;
+	padding-right: 2px;
+	color: #ff4444;
+}
+
+.resultsTitleTable {
+	border: 0;
+	width: 100%;
+	line-height: 1.7em;
+	border-spacing: 0.1em;
+}
+
+.resultsTable {
+	border: 0;
+	width: 100%;
+	line-height: 1.7em;
+	border-spacing: 0.1em;
+}
+
+.resultsTable .method {
+	width: 1em;
+}
+
+.resultsTable.passed {
+	background: #008000;
+	width: 1em;
+}
+
+.resultsTable.failure {
+	background: red;
+	width: 1em;
+}
+
+.resultsTable .duration {
+	width: 6em;
+}
+
+.resultsTable td {
+	vertical-align: top;
+}
+
+.passed {
+	background-color: #44aa44;
+	width: 1em;
+}
+
+.skipped {
+	background-color: #ffaa00;
+	width: 1em;
+}
+
+.failed {
+	background-color: #ff4444;
+	width: 1em;
+}
+
+.arguments {
+	font-family: Lucida Console, Monaco, Courier New, monospace;
+	font-weight: bold;
+}
+</style>
+
+<script>
+function displayElement(elementId, style) {
+	var current = getStyle(elementId, 'display');
+	document.getElementById(elementId).style.display = (current == 'none' ? style : 'none');
+}
+
+function getStyle(elementId, property) {
+	var element = document.getElementById(elementId);
+	return element.currentStyle ? element.currentStyle[property] : document.defaultView.getComputedStyle(element, null).getPropertyValue(property);
+}
+
+function switchScene(sceneId) {
+	var scene;
+	if (document.getElementById) {
+		scene = document.getElementById(sceneId);
+	} else if (document.all) {
+		scene = document.all[sceneId];
+	}
+	scene.textContent = scene.innerHTML == '\u25b6' ? '\u25bc' : '\u25b6';
+}
+
+function show(obj) {
+	var caseId = obj.id;
+	document.getElementById("currentCaseId").value = caseId;
+	var caseName = obj.text;
+	document.getElementById("caseName").innerHTML = "当前用例:" + caseName;
+	var caseDiv = caseId+"Div";
+	var caseCount = document.getElementById("caseCount").value;
+	for (var i = 0; i < caseCount; i++) {
+		var div = "case" + i + "Div";
+		if (div == caseDiv) {
+			document.getElementById(div).style.display = "inline"
+		} else {
+			document.getElementById(div).style.display = "none"
+		}
+	}
+}
+</script>
+</head>
+<body>
+	<h1>自动化测试报告</h1>
+	<table width="100%">
+		<tr>
+			<td align="left">Report Date: ${reportDate}</td>
+			<td align="right">Designed for use with <a href="#">longteng</a>
+				and <a href="#">龙腾测试</a>.
+			</td>
+		</tr>
+	</table>
+	<hr size="1">
+	<h2>概要</h2>
+	<table align="center" class="details" border="0" cellpadding="5"
+		cellspacing="2" width="95%">
+		<tr valign="top">
+			<th>用例总数</th>
+			<th>通过数</th>
+			<th>失败数</th>
+			<th>通过率</th>
+			<th>运行时间</th>
+			<th>执行机器IP</th>
+			<th>执行人</th>
+		</tr>
+		<tr valign="top" class="">
+			<td align="center">${totalCase}</td>
+			<td align="center">
+				<span style="color: green"><b>${passCase}</b></span>
+			</td>
+			<td align="center"><span
+				style="color: red; width: 120px; height: 20px;"><b>${failCase}</b>
+			</span></td>
+			<td align="center">${passRate}</td>
+			<td align="center">${runTime}</td>
+			<td align="center">${ip}</td>
+			<td align="center">${executor}</td>
+		</tr>
+	</table>
+	</br>
+	<hr size="1" width="100%" align="center">
+	<div>
+		<div id="div_left" style="overflow: auto">
+			<table id="suites">
+				${suites}
+			</table>
+		</div>
+		<div id="div_center">
+			<HR align="center" width="0" style="height: 100%;" size="2" color="#00686b">
+		</div>
+		<div id="div_right" style="overflow: auto">
+			<div>
+				<div>
+					<table>
+						<tr>
+							<td><h1 id="caseName"></h1></td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<table class="resultsTitleTable">
+				<tr>
+					<th id="headerStepColor" colspan="3" class="header skipped">
+						<span id="headerStepColorSpan">所有断言</span>
+					</th>
+				</tr>
+				<tr>
+					<th align="left" style="width: 15%">断言</th>
+					<th align="left" style="width: 5%">状态</th>
+					<th align="left" style="width: 80%">描述</th>
+				</tr>
+			</table>
+			${cases}
+			<input id="caseCount" type="hidden" value="${caseCount}">
+			<input id="currentCaseId" type="hidden">
+		</div>
+	</div>
+	</div>
+</body>
+</html>
