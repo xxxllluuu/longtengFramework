@@ -29,12 +29,13 @@ public class InterfaceTest {
         String expected = dataMap.get("预期结果");
         String sql = dataMap.get("SQL");
         String field = dataMap.get("字段");
+        String contentType = dataMap.get("Content-Type");
 
         Map<String, String> paramMap = new HashMap<String, String>();
         paramMap.put("url", url);
         paramMap.put("method", method);
         paramMap.put("requestBody", param);
-        paramMap.put("Content-Type", "application/json");
+        paramMap.put("Content-Type", contentType);
 
         Map<String, String> resultMap = HttpClientUtil.request(paramMap, null);
 

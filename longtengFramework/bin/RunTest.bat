@@ -1,1 +1,1 @@
-java -jar longtengFramework-1.0-SNAPSHOT.jar
+CHCP 65001 && java -jar longtengFramework-1.0-SNAPSHOT.jar

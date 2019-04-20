@@ -1,23 +1,31 @@
 package com.longteng.framework.util;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
+
+import com.alibaba.fastjson.JSON;
 
 public class HttpClientUtil {
 
     private static Logger logger = Logger.getLogger(HttpClientUtil.class);
 
     // 返回两个信息,状态码和返回结果
+    @SuppressWarnings("unchecked")
     public static Map<String, String> request(Map<String, String> paramMap, Map<String, String> headers) {
 
         Map<String, String> returnMap = new HashMap<String, String>();
@@ -45,7 +53,7 @@ public class HttpClientUtil {
                 String resCode = String.valueOf(response.getStatusLine().getStatusCode());
                 logger.info("返回码：" + resCode);
                 if (resCode.startsWith("2")) {
-                    String entityString = EntityUtils.toString(response.getEntity());
+                    String entityString = EntityUtils.toString(response.getEntity(), "UTF-8");
                     logger.info("返回报文：" + entityString);
                     returnMap.put("responseBody", entityString);
                 }
@@ -62,31 +70,69 @@ public class HttpClientUtil {
             HttpPost post = new HttpPost(url);
             post.setHeader("Content-Type", contentType);
 
-            try {
+            if ("application/json".equalsIgnoreCase(contentType)) {
+                try {
 
-                StringEntity entity = new StringEntity(requestBody);
-                post.setEntity(entity);
+                    StringEntity entity = new StringEntity(requestBody);
+                    post.setEntity(entity);
 
-                response = client.execute(post);
-                String resCode = String.valueOf(response.getStatusLine().getStatusCode());
-                logger.info("返回码：" + resCode);
+                    response = client.execute(post);
+                    String resCode = String.valueOf(response.getStatusLine().getStatusCode());
+                    logger.info("返回码：" + resCode);
 
-                if (resCode.startsWith("2")) {
-                    String entityString = EntityUtils.toString(response.getEntity());
-                    logger.info("返回报文：" + entityString);
-                    returnMap.put("responseBody", entityString);
+                    if (resCode.startsWith("2")) {
+                        String entityString = EntityUtils.toString(response.getEntity(), "UTF-8");
+                        logger.info("返回报文：" + entityString);
+                        returnMap.put("responseBody", entityString);
+                    }
+
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+                finally {
+                    close(client, response);
+                }
+            }
+
+            if ("application/x-www-form-urlencoded".equalsIgnoreCase(contentType)) {
+
+                Map<String, String> reqMap = (Map<String, String>) JSON.parse(requestBody);
+
+                List<NameValuePair> pairList = new ArrayList<NameValuePair>();
+
+                try {
+
+                    for (String key : reqMap.keySet()) {
+                        String value = reqMap.get(key);
+                        BasicNameValuePair pair = new BasicNameValuePair(key, value);
+                        pairList.add(pair);
+                    }
+
+                    post.setEntity(new UrlEncodedFormEntity(pairList, "UTF-8"));
+
+                    response = client.execute(post);
+
+                    String resCode = String.valueOf(response.getStatusLine().getStatusCode());
+                    logger.info("返回码：" + resCode);
+
+                    if (resCode.startsWith("2")) {
+                        String entityString = EntityUtils.toString(response.getEntity());
+                        logger.info("返回报文：" + entityString);
+                        returnMap.put("responseBody", entityString);
+                    }
+
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
                 }
 
             }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-            finally {
-                close(client, response);
-            }
+
         }
 
         return returnMap;
+
     }
 
     private static void close(CloseableHttpClient client, CloseableHttpResponse response) {
